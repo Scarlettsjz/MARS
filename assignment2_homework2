@@ -1,0 +1,58 @@
+# Computer Organization assignment_homework_2
+# author: Sijia Zhang
+
+# variables setting
+.data
+success: .ascii  "Success! Location:"
+fail: .ascii "Fail!"
+string:.space 100
+size:.word 100
+
+# program instructions
+.text
+main:
+    la $a0 string
+    lw $a1 size # it measures the maximum number of characters to read
+    li $v0 8 # string read
+    syscall # issue a system call
+    
+ gchar:
+    li $v0 12 # character read
+    syscall 
+    sub $t0 $v0 63 # substraction with overflow
+    beqz $t0 exit # quit if $t0=0
+    la $t1 string
+    li $t2 0
+    j find
+    
+ find:
+    subi $t3, $t2, 100 # set $t3 to ($t2-100)
+    beqz $t3, fail_case 
+    add $t4, $t1, $t2 # add $t4 to ($t1+$t2)
+    lb $t5, ($t4) # a byte is loaded from addr and placed into the rightmost byte of d
+    sub $t6, $t5, $v0
+    beqz $t6, success_case
+    addi $t2, $t2, 1
+    j find
+    
+ fail_case:
+    la $a0, fail
+    li $v0, 4
+    syscall 
+    j gchar
+ 
+ success_case:
+    la $a0,success
+    li $v0,4 
+    syscall 
+    add $t2, $t2, 1
+    add $a0, $t2, 0
+    li $v0, 1
+    syscall 
+    j gchar
+    
+ # exit
+ exit:
+    li $v0, 10
+    syscall 
+     
